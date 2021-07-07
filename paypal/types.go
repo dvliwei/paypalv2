@@ -41,6 +41,24 @@ const (
 
 // Amount struct
 type (
+	CallBackAmount struct {
+		Currency string `json:"currency"`
+		Value string `json:"value"`
+	}
+	CallBackPayoutItem struct {
+		RecipientType string `json:"recipient_type"`
+		Note string `json:"note"`
+		Receiver string `json:"receiver"`
+		SenderItemId string `json:"sender_item_id"`
+		Amount *CallBackAmount
+	}
+
+	CreateOrder struct {
+		Intent string `json:"intent"`
+		PurchaseUnits []PurchaseUnit `json:"purchase_units"`
+		ApplicationContext  ApplicationContext `json:"application_context"`
+		Resource *CallBackPayoutItem
+	}
 
 	JSONTime time.Time
 

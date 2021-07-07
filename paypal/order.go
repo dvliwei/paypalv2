@@ -10,11 +10,28 @@ package paypal
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
+	"github.com/astaxie/beego/httplib"
+	"time"
 )
 
-func (c *Client) CreateOrder(ctx context.Context, intent string, purchaseUnits []PurchaseUnitRequest, payer *CreateOrderPayer, appContext *ApplicationContext) (*Order, error) {
-	return c.CreateOrderWithPaypalRequestID(ctx, intent, purchaseUnits, payer, appContext, "")
+func (c *Client) CreateOrder(ctx context.Context, createOrder CreateOrder) (*Order, error) {
+	var createOrderReponse Order
+	postUrl:= c.Domain+"/v2/checkout/orders"
+	req := httplib.Post(postUrl)
+	req.Header("Accept","application/json")
+	req.Header("Authorization","Bearer "+c.Token.Token)
+	req.JSONBody(createOrder)
+	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify:true})
+	req.SetTimeout(100*time.Second, 30*time.Second).Response()
+	str ,err:=req.String()
+	if err!=nil{
+		return &createOrderReponse,err
+	}
+	err =req.ToJSON(&createOrderReponse)
+	fmt.Println(str)
+	return &createOrderReponse,nil
 }
 
 
