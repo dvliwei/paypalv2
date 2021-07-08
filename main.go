@@ -15,7 +15,7 @@ import (
 )
 
 func main()  {
-	c,err:=paypal.PaypalClient("AYBZPN0IfgEVAQmWmYBclToRI7qdDiBbLk8sT0nIfYiuZeO9pausOuvED2q3BPq-1GwY9lWv5j8kP26o","EOpEb-0mqVyO-Hc-JxT3GqgVgoCh2zDcyRAqbJMJ2CKxPEPfsPlz9kckJGTUXxpc4LOOdkyWIrp6IdQ8",paypal.APIBaseSandBox)
+	c,err:=paypal.PaypalClient("*****","***",paypal.APIBaseSandBox)
 	if err!=nil{
 		fmt.Println(err)
 	}
@@ -28,7 +28,7 @@ func main()  {
 
 	var purchaseUnit paypal.PurchaseUnit
 	purchaseUnit.Amount =&amout
-	purchaseUnit.ReferenceID = "asdasda13sadasdas1"
+	purchaseUnit.ReferenceID = "asdasda13sadasdas5"
 
 	var purchaseUnits []paypal.PurchaseUnit
 	purchaseUnits = append(purchaseUnits,purchaseUnit)

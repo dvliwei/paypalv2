@@ -9,28 +9,58 @@
 package paypal
 
 import (
+	"bytes"
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
-	"github.com/astaxie/beego/httplib"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"time"
 )
 
 func (c *Client) CreateOrder(ctx context.Context, createOrder CreateOrder) (*Order, error) {
 	var createOrderReponse Order
 	postUrl:= c.Domain+"/v2/checkout/orders"
-	req := httplib.Post(postUrl)
-	req.Header("Accept","application/json")
-	req.Header("Authorization","Bearer "+c.Token.Token)
-	req.JSONBody(createOrder)
-	req.SetTLSClientConfig(&tls.Config{InsecureSkipVerify:true})
-	req.SetTimeout(100*time.Second, 30*time.Second).Response()
-	str ,err:=req.String()
+	var buf io.Reader
+	jsonStr, err := json.Marshal(&createOrder)
 	if err!=nil{
-		return &createOrderReponse,err
+		return nil,err
 	}
-	err =req.ToJSON(&createOrderReponse)
-	fmt.Println(str)
+	buf = bytes.NewBuffer(jsonStr)
+	tr := &http.Transport{
+		MaxIdleConns:       30,
+		IdleConnTimeout:    100 * time.Second,
+		DisableCompression: true,
+		TLSClientConfig:&tls.Config{InsecureSkipVerify:true},
+	}
+	client := &http.Client{
+		Transport:tr,
+	}
+	req,err:=http.NewRequest("POST",postUrl,ioutil.NopCloser(buf))
+	if err!=nil{
+		return nil,err
+	}
+	req.Header.Set("Content-Type", "application/json;charset=UTF-8")
+	req.Header.Add("Authorization","Bearer "+c.Token.Token)
+
+	resp, err := client.Do(req)
+	if err!=nil{
+		return nil,err
+	}
+	defer resp.Body.Close()
+	//
+	//fmt.Println("response Status:", resp.Status)
+	//fmt.Println("response Headers:", resp.Header)
+	str,err:=ioutil.ReadAll(resp.Body)
+	if err!=nil{
+		return nil,err
+	}
+	err1:=json.Unmarshal(str,&createOrderReponse)
+	if err1!=nil{
+		return nil,err
+	}
 	return &createOrderReponse,nil
 }
 
